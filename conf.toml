@@ -1,0 +1,12 @@
+#---CONFIGURATION FILE---
+#Modify values as you wish
+
+#testVariants is boolean value
+#true: Prefix and Suffix variations are tested
+#false: Prefix and Suffix variations are not tested
+testVariants = true
+
+#preSeq is an array of prefix strings to test
+preSeq = [ "123", "2008", "FOX" ]
+#postSeq is an array of suffix strings to test
+postSeq = [ "456", "1995", "512"]
