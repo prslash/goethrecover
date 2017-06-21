@@ -134,6 +134,23 @@ func testPassVariants(pass string) bool {
 	return false
 }
 
+//end print some outputs
+//success true if passphrase FOUND
+//success false if not FOUND
+func end(success bool) {
+	//Some output
+	log.Printf("Tested %v passphrases in %v seconds.", passCount, elapsed.Seconds())
+
+	if success {
+		log.Print("PASSPHRASE FOUND")
+		fmt.Printf("\nWallet Address: %s\n\n------------ PASSPHRASE ------------\n\n%s\n\n------------------------------------\n\n", address, passphrase)
+		fmt.Print("Please make a donation to developer:\nETH: 0x2feD76d5abE6c001D259eC769c28f6068E0166CB\nBTC: 1HTpxVw6KkDakhjqL3bgkYtM7Gsxxzmjw5\n\n")
+	} else {
+		log.Print("Sorry. Passphrase not found!")
+	}
+
+}
+
 //Main function
 func main() {
 
@@ -141,9 +158,9 @@ func main() {
 	// Create a scanner to read passList line by line
 	scanner := bufio.NewScanner(passFile)
 
-	success := false
-
+	//Start time for elapsed
 	startT := time.Now()
+
 	//Read line by line passList
 	if conf.TestVariants { //With Password Variants
 		log.Print("Searching Passphrase with variants... Please wait\n\n")
@@ -151,11 +168,13 @@ func main() {
 			pass := scanner.Text()
 			if testPass(pass) {
 				elapsed = time.Since(startT)
-				success = true
+				end(true)
+				return
 			} else {
 				if testPassVariants(pass) {
 					elapsed = time.Since(startT)
-					success = true
+					end(true)
+					return
 				}
 			}
 		}
@@ -165,23 +184,20 @@ func main() {
 			pass := scanner.Text()
 			if testPass(pass) {
 				elapsed = time.Since(startT)
-				success = true
+				end(true)
+				return
 			}
 		}
 	}
 
-	// check for scanner errors
+	//if passphrase not found
+	elapsed = time.Since(startT)
+
+	// check scanner errors
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
 
-	//Some output
-	log.Printf("Tested %v passphrases in %v seconds.", passCount, elapsed.Seconds())
-	if success {
-		log.Print("PASSPHRASE FOUND")
-		fmt.Printf("\nWallet Address: %s\n\n------------ PASSPHRASE ------------\n\n%s\n\n------------------------------------\n\n", address, passphrase)
-		fmt.Print("Please make a donation to developer:\nETH: 0x2feD76d5abE6c001D259eC769c28f6068E0166CB\nBTC: 1HTpxVw6KkDakhjqL3bgkYtM7Gsxxzmjw5\n\n")
-	} else {
-		log.Print("Sorry. Passphrase not found!")
-	}
+	end(false)
+	return
 }
