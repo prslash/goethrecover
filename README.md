@@ -45,10 +45,25 @@ testVariants = true
 preSeq = [ "123", "2008", "FOX" ]
 #postSeq is an array of suffix strings to test
 postSeq = [ "456", "1995", "512"]
+
+#preBrute section
+[preBrute]
+active = true
+lenght = 3
+chars = ['a', 'b', 'c']
+
+[postBrute]
+active = true
+lenght = 3
+chars = ['1', '2', '3']
 ```
 If you want to try prefix and suffix you need to set: `testVariants = true`<br />
 -Set prefix and suffix strings<br />
-Otherwise set: `testVariants = false`
+Otherwise set: `testVariants = false`<br /><br />
+If you want to try brute force of prefix (preBrute) and/or suffix (postBrute) set:<br />
+`active = true`<br />
+`lenght = 3` lenght of string to bruteforce<br />
+`chars = ['a', 'b', 'c']` set of custom characters<br />
 
 ### Example
 ```

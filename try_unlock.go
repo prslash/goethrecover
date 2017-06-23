@@ -13,8 +13,8 @@ var address string
 //testPass check if pass is correct.
 //Return true if pass is correct, false if pass is invalid
 func testPass(pass string) bool {
-
-	fmt.Printf("\rTesting %d password", passCount)
+	fmt.Println(pass)
+	//fmt.Printf("\rTesting %d password", passCount)
 	if len(pass) <= 7 {
 		return false
 	} else {

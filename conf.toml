@@ -13,10 +13,11 @@ preSeq = [ "123", "2008", "FOX" ]
 #in combination with preSeq
 postSeq = [ "456", "1995", "512"]
 
+#preBrute section
 [preBrute]
 active = true
 lenght = 3
-chars = ['a', 'b', 'c']
+chars = ['a', 'b']
 
 [postBrute]
 active = true

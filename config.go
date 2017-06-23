@@ -81,6 +81,7 @@ func init() {
 
 	log.Printf("Configurations %v", Conf)
 
+	//Perform combinations and save result to test later as prefix of each pass
 	if Conf.PreBrute.Active {
 		log.Println("Performing combinations [preBrute]...")
 		preComb.pre = true
@@ -95,6 +96,7 @@ func init() {
 		preComb.result = comb(preComb.n, preComb.k, preComb.indexes, preComb.result)
 	}
 
+	//Perform combinations and save result to test later as suffix of each pass
 	if Conf.PostBrute.Active {
 		log.Println("Performing combinations [postBrute]...")
 		postComb.post = true
@@ -127,12 +129,12 @@ func init() {
 	passCount = 0
 }
 
+//comb calculates combinations with repetition of n things taken k at a time.
 //on first call indexes must be an array of k elements sets to 0
 //result must be a 'var result [][]byte'
 //TO DO
 //indexes maybe unnecessary
 func comb(n []byte, k int, indexes []int, result [][]byte) [][]byte {
-	//Aggiungere controlli parametri
 	temp := make([]byte, k)
 	for i := k - 1; i >= 0; i-- {
 		temp[i] = n[indexes[i]]
