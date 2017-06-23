@@ -4,9 +4,21 @@
 #testVariants is boolean value
 #true: Prefix and Suffix variations are tested
 #false: Prefix and Suffix variations are not tested
-testVariants = true
+customVariants = true
 
-#preSeq is an array of prefix strings to test
+#preSeq is an array of prefix strings to test for each passphrase
+#in combination with postSeq
 preSeq = [ "123", "2008", "FOX" ]
-#postSeq is an array of suffix strings to test
+#postSeq is an array of suffix strings to test for each passphrase
+#in combination with preSeq
 postSeq = [ "456", "1995", "512"]
+
+[preBrute]
+active = true
+lenght = 3
+chars = ['a', 'b', 'c']
+
+[postBrute]
+active = true
+lenght = 3
+chars = ['1', '2', '3']
