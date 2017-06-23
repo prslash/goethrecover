@@ -13,7 +13,7 @@ go get "github.com/naoina/toml"
 
 Then build goethrecover
 ```
-go build goethrecover.go
+go build goethrecover.go try_unlock.go config.go
 ```
 
 ## How does it works?
