@@ -10,12 +10,6 @@ import (
 	"github.com/naoina/toml"
 )
 
-type Brute struct {
-	Active bool
-	Lenght int
-	Chars  []byte
-}
-
 //Configuration data
 type Config struct {
 	CustomVariants bool
@@ -33,6 +27,7 @@ type Config struct {
 	}
 }
 
+//Struct used for call comb()
 type combData struct {
 	n       []byte
 	k       int
@@ -42,6 +37,7 @@ type combData struct {
 	post    bool
 }
 
+//Variable used to call comb()
 var preComb combData
 var postComb combData
 
@@ -81,7 +77,8 @@ func init() {
 
 	log.Printf("Configurations %v", Conf)
 
-	//Perform combinations and save result to test later as prefix of each pass
+	//Load Combinations conf and
+	//perform combinations and save result to test later as prefix of each pass
 	if Conf.PreBrute.Active {
 		log.Println("Performing combinations [preBrute]...")
 		preComb.pre = true
@@ -96,7 +93,8 @@ func init() {
 		preComb.result = comb(preComb.n, preComb.k, preComb.indexes, preComb.result)
 	}
 
-	//Perform combinations and save result to test later as suffix of each pass
+	//Load Combinations conf and
+	//perform combinations and save result to test later as suffix of each pass
 	if Conf.PostBrute.Active {
 		log.Println("Performing combinations [postBrute]...")
 		postComb.post = true
