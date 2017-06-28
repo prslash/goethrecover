@@ -37,6 +37,7 @@ func end(success bool) {
 }
 
 func manager(chans []chan string, wg *sync.WaitGroup) {
+	//defer fmt.Print("Manager: done.")
 	found = false
 
 	defer passFile.Close()
@@ -61,12 +62,12 @@ func manager(chans []chan string, wg *sync.WaitGroup) {
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
-	//end(false)
 	return
 }
 
 func onlyPass(ch <-chan string, wg *sync.WaitGroup) {
 	defer wg.Done()
+	//defer fmt.Print("onlyPass: done.")
 	log.Println("Searching Passphrase without variants... Please wait")
 	time.Sleep(500 * time.Millisecond)
 	for {
@@ -85,6 +86,7 @@ func onlyPass(ch <-chan string, wg *sync.WaitGroup) {
 
 func customVariants(ch <-chan string, wg *sync.WaitGroup) {
 	defer wg.Done()
+	//defer fmt.Print("customVariants: done.")
 	log.Println("Searching Passphrase with variants... Please wait")
 	time.Sleep(500 * time.Millisecond)
 	for {
@@ -103,6 +105,7 @@ func customVariants(ch <-chan string, wg *sync.WaitGroup) {
 
 func preBrute(ch <-chan string, wg *sync.WaitGroup) {
 	defer wg.Done()
+	//defer fmt.Print("preBrute: done.")
 	log.Println("Searching Passphrase with preBrute... Please wait")
 	time.Sleep(500 * time.Millisecond)
 	for {
@@ -121,6 +124,7 @@ func preBrute(ch <-chan string, wg *sync.WaitGroup) {
 
 func postBrute(ch <-chan string, wg *sync.WaitGroup) {
 	defer wg.Done()
+	//defer fmt.Print("postBrute: done.")
 	log.Println("Searching Passphrase with postBrute... Please wait")
 	time.Sleep(500 * time.Millisecond)
 	for {
@@ -145,29 +149,29 @@ func main() {
 	chans := make([]chan string, 0)
 
 	if Conf.CustomVariants { //With Password Variants
-		ch1 := make(chan string)
-		ch2 := make(chan string)
+		ch1 := make(chan string, 250)
+		ch2 := make(chan string, 250)
 		chans = append(chans, ch1)
 		chans = append(chans, ch2)
 		wg.Add(2)
 		go onlyPass(ch1, &wg)
 		go customVariants(ch2, &wg)
 	} else { //Without Password Variants
-		ch := make(chan string)
+		ch := make(chan string, 250)
 		chans = append(chans, ch)
 		wg.Add(1)
 		go onlyPass(ch, &wg)
 	}
 
 	if Conf.PreBrute.Active {
-		ch := make(chan string)
+		ch := make(chan string, 250)
 		chans = append(chans, ch)
 		wg.Add(1)
 		go preBrute(ch, &wg)
 	}
 
 	if Conf.PostBrute.Active {
-		ch := make(chan string)
+		ch := make(chan string, 250)
 		chans = append(chans, ch)
 		wg.Add(1)
 		go postBrute(ch, &wg)
