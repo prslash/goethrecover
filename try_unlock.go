@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sync/atomic"
 
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 )
@@ -17,7 +18,7 @@ func testPass(pass string) bool {
 	if len(pass) <= 7 {
 		return false
 	} else {
-		passCount++
+		atomic.AddInt32(&passCount, 1)
 		if test, err := keystore.DecryptKey(keyJson, pass); err != nil {
 			//fmt.Printf("Errore: %v\n", err)
 			return false
@@ -32,30 +33,32 @@ func testPass(pass string) bool {
 //testPassVariants check all prefix and suffix variations
 //of pass. Remember to set preSeq and postSeq in your conf.toml
 func testPassVariants(pass string) bool {
-	var passTemp string
+	if pass != "" {
+		var passTemp string
 
-	//Test pass with all preSeq
-	for _, seqPre := range Conf.PreSeq {
-		passTemp = seqPre + pass
-		if testPass(passTemp) {
-			return true
-		}
-	}
-
-	//Test pass with all postSeq
-	for _, seqPost := range Conf.PostSeq {
-		passTemp = pass + seqPost
-		if testPass(passTemp) {
-			return true
-		}
-	}
-
-	//Test pass with all preSeq - postSeq combinations
-	for _, seqPre := range Conf.PreSeq {
-		for _, seqPost := range Conf.PostSeq {
-			passTemp = seqPre + pass + seqPost
+		//Test pass with all preSeq
+		for _, seqPre := range Conf.PreSeq {
+			passTemp = seqPre + pass
 			if testPass(passTemp) {
 				return true
+			}
+		}
+
+		//Test pass with all postSeq
+		for _, seqPost := range Conf.PostSeq {
+			passTemp = pass + seqPost
+			if testPass(passTemp) {
+				return true
+			}
+		}
+
+		//Test pass with all preSeq - postSeq combinations
+		for _, seqPre := range Conf.PreSeq {
+			for _, seqPost := range Conf.PostSeq {
+				passTemp = seqPre + pass + seqPost
+				if testPass(passTemp) {
+					return true
+				}
 			}
 		}
 	}
@@ -63,17 +66,19 @@ func testPassVariants(pass string) bool {
 }
 
 func testCombinations(pass string, combs combData) bool {
-	if combs.pre == true {
-		for _, s := range combs.result {
-			if testPass(string(s) + pass) {
-				return true
+	if pass != "" {
+		if combs.pre == true {
+			for _, s := range combs.result {
+				if testPass(string(s) + pass) {
+					return true
+				}
 			}
 		}
-	}
-	if combs.post == true {
-		for _, s := range combs.result {
-			if testPass(pass + string(s)) {
-				return true
+		if combs.post == true {
+			for _, s := range combs.result {
+				if testPass(pass + string(s)) {
+					return true
+				}
 			}
 		}
 	}
