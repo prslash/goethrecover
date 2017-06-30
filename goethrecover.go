@@ -50,7 +50,6 @@ func (w *worker) finished(n int32) {
 
 var elapsed time.Duration
 var startT time.Time
-var found bool
 
 //end print some outputs
 //success true if passphrase FOUND
@@ -61,12 +60,10 @@ func end(success bool) {
 	log.Printf("Tested %v passphrases in %v seconds.", passCount, elapsed.Seconds())
 
 	if success {
-		found = true
 		log.Print("PASSPHRASE FOUND")
 		fmt.Printf("\nWallet Address: %s\n\n------------ PASSPHRASE ------------\n\n%s\n\n------------------------------------\n\n", address, passphrase)
 		fmt.Print("Please make a donation to developer:\n\nETH: 0x2feD76d5abE6c001D259eC769c28f6068E0166CB\nBTC: 1HTpxVw6KkDakhjqL3bgkYtM7Gsxxzmjw5\n\n")
 	} else {
-		found = false
 		log.Print("Sorry. Passphrase not found!")
 	}
 }
@@ -84,7 +81,6 @@ func maxLoads(workers []*worker) *worker {
 }
 
 func manager(workers []*worker) {
-	found = false
 
 	defer passFile.Close()
 	// Create a scanner to read passList line by line
@@ -103,6 +99,11 @@ func manager(workers []*worker) {
 	}
 	for _, w := range workers {
 		close(w.in)
+	}
+	time.Sleep(3 * time.Second)
+	if len(workers) < 4 {
+		t := maxLoads(workers)
+		t.add(1)
 	}
 	i := 0
 	for {
