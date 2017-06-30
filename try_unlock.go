@@ -11,6 +11,9 @@ import (
 var passphrase string
 var address string
 
+//Counter password tested
+var passCount int32
+
 //testPass check if pass is correct.
 //Return true if pass is correct, false if pass is invalid
 func testPass(pass string) bool {
