@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"runtime"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -13,7 +14,8 @@ type worker struct {
 	name     string
 	routines *int32
 	in       chan string
-	done     chan bool
+	done     chan *worker
+	found    bool
 	f        func(*worker)
 	wg       *sync.WaitGroup
 }
@@ -23,7 +25,7 @@ func (w *worker) start(f func(*worker), wg *sync.WaitGroup, name string) *worker
 	w.routines = new(int32)
 	*w.routines = int32(1)
 	w.in = make(chan string, 250)
-	w.done = make(chan bool)
+	w.done = make(chan *worker)
 	w.f = f
 	wg.Add(1)
 	w.wg = wg
@@ -64,7 +66,9 @@ func end(success bool) {
 		fmt.Printf("\nWallet Address: %s\n\n------------ PASSPHRASE ------------\n\n%s\n\n------------------------------------\n\n", address, passphrase)
 		fmt.Print("Please make a donation to developer:\n\nETH: 0x2feD76d5abE6c001D259eC769c28f6068E0166CB\nBTC: 1HTpxVw6KkDakhjqL3bgkYtM7Gsxxzmjw5\n\n")
 	} else {
-		log.Print("Sorry. Passphrase not found!")
+		log.Print("Sorry. Passphrase not found!\n\n")
+		fmt.Print("------------------------------------\n\nPlease make a donation to developer:\n\nETH: 0x2feD76d5abE6c001D259eC769c28f6068E0166CB\nBTC: 1HTpxVw6KkDakhjqL3bgkYtM7Gsxxzmjw5\n\n")
+
 	}
 }
 
@@ -83,6 +87,16 @@ func maxLoads(workers []*worker) *worker {
 func manager(workers []*worker) {
 
 	defer passFile.Close()
+
+	procs := runtime.GOMAXPROCS(runtime.NumCPU())
+	if len(workers) < procs {
+		n := procs - len(workers)
+		for i := 0; i < n; i++ {
+			time.Sleep(1 * time.Second)
+			t := maxLoads(workers)
+			t.add(1)
+		}
+	}
 	// Create a scanner to read passList line by line
 	scanner := bufio.NewScanner(passFile)
 	//Start time for elapsed
@@ -100,43 +114,34 @@ func manager(workers []*worker) {
 	for _, w := range workers {
 		close(w.in)
 	}
-	time.Sleep(3 * time.Second)
-	if len(workers) < 4 {
-		t := maxLoads(workers)
-		t.add(1)
-	}
-	i := 0
+
 	for {
-		select {
-		case d := <-workers[i].done:
-			if d == true {
-				elapsed = time.Since(startT)
-				end(true)
-				return
-			} else {
-				//delete worker
-				if len(workers) != 1 {
-					t := maxLoads(workers)
-					t.add(1)
-				}
-				n := atomic.LoadInt32(workers[i].routines)
-				if n == 1 {
-					workers = append(workers[:i], workers[i+1:]...)
-					i = 0
-					if len(workers) == 0 {
-						elapsed = time.Since(startT)
-						end(false)
-						return
-					}
+		for i := 0; i < len(workers); i++ {
+			w := workers[i]
+			select {
+			case wd := <-w.done:
+				if wd.found {
+					elapsed = time.Since(startT)
+					end(true)
+					return
 				} else {
-					workers[i].finished(1)
+					//delete worker
+					if len(workers) != 1 {
+						t := maxLoads(workers)
+						t.add(1)
+					}
+					n := atomic.LoadInt32(wd.routines)
+					if n == 1 {
+						workers = append(workers[:i], workers[i+1:]...)
+						if len(workers) == 0 {
+							elapsed = time.Since(startT)
+							end(false)
+							return
+						}
+					} else {
+						w.finished(1)
+					}
 				}
-			}
-		default:
-			if i < len(workers)-1 {
-				i++
-			} else {
-				i = 0
 			}
 		}
 	}
@@ -148,10 +153,12 @@ func onlyPass(w *worker) {
 		select {
 		case pass, ok := <-w.in:
 			if ok && testPass(pass) {
-				w.done <- true
+				w.found = true
+				w.done <- w
 				return
 			} else if !ok {
-				w.done <- false
+				w.found = false
+				w.done <- w
 				return
 			}
 		}
@@ -164,10 +171,12 @@ func customVariants(w *worker) {
 		select {
 		case pass, ok := <-w.in:
 			if ok && testPassVariants(pass) {
-				w.done <- true
+				w.found = true
+				w.done <- w
 				return
 			} else if !ok {
-				w.done <- false
+				w.found = false
+				w.done <- w
 				return
 			}
 		}
@@ -180,10 +189,12 @@ func preBrute(w *worker) {
 		select {
 		case pass, ok := <-w.in:
 			if ok && testCombinations(pass, preComb) {
-				w.done <- true
+				w.found = true
+				w.done <- w
 				return
 			} else if !ok {
-				w.done <- false
+				w.found = false
+				w.done <- w
 				return
 			}
 		}
@@ -196,10 +207,12 @@ func postBrute(w *worker) {
 		select {
 		case pass, ok := <-w.in:
 			if ok && testCombinations(pass, postComb) {
-				w.done <- true
+				w.found = true
+				w.done <- w
 				return
 			} else if !ok {
-				w.done <- false
+				w.found = false
+				w.done <- w
 				return
 			}
 		}
@@ -238,5 +251,5 @@ func main() {
 	}
 
 	manager(w)
-	wg.Wait()
+	//wg.Wait()
 }
