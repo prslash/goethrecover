@@ -24,7 +24,7 @@ func (w *worker) start(f func(*worker), wg *sync.WaitGroup, name string) *worker
 	w.name = name
 	w.routines = new(int32)
 	*w.routines = int32(1)
-	w.in = make(chan string, 250)
+	w.in = make(chan string, 2500)
 	w.done = make(chan *worker)
 	w.f = f
 	wg.Add(1)
@@ -87,18 +87,23 @@ func maxLoads(workers []*worker) *worker {
 func manager(workers []*worker) {
 
 	defer passFile.Close()
-
+	x := 0
+	scanner := bufio.NewScanner(passFile)
+	for scanner.Scan() {
+		scanner.Text()
+		x++
+	}
+	fmt.Printf("\nPassword in Passlist: %d\n", x)
 	procs := runtime.GOMAXPROCS(runtime.NumCPU())
 	if len(workers) < procs {
 		n := procs - len(workers)
 		for i := 0; i < n; i++ {
-			time.Sleep(1 * time.Second)
-			t := maxLoads(workers)
-			t.add(1)
+			workers[0].add(1)
 		}
 	}
 	// Create a scanner to read passList line by line
-	scanner := bufio.NewScanner(passFile)
+	passFile.Seek(0, 0)
+	scanner = bufio.NewScanner(passFile)
 	//Start time for elapsed
 	startT = time.Now()
 
