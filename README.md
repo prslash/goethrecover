@@ -1,11 +1,11 @@
 ## goethrecover
 ### What is goethrecover?
-goethrecover is a very very simple tool written in golang for recover your lost passphrase of Ethereum Wallets using a list of passphrases that you usually use. You can also add some prefix and suffix string to these passphrases.
+goethrecover is a very simple tool written in golang to recover lost passphrase of Ethereum Wallets using a list of passphrases (dictionary attack). You can also add some prefix and suffix strings to these passphrases.
 
 ## How to install goethrecover?
 To run goethrecover you need to install golang from [Install Golang](https://golang.org/doc/install)
 
-Add some packages using go get
+Add some packages using 'go get'
 ```
 go get "github.com/ethereum/go-ethereum/accounts/keystore"
 go get "github.com/naoina/toml"
@@ -63,7 +63,7 @@ Otherwise set: `testVariants = false`<br /><br />
 If you want to try brute force of prefix (preBrute) and/or suffix (postBrute) set:<br />
 `active = true`<br />
 `lenght = 3` lenght of string to bruteforce<br />
-`chars = ['a', 'b', 'c']` set of custom characters<br />
+`chars = ['a', 'b', 'c']` set of custom character<br />
 
 ### Example
 ```
@@ -72,6 +72,7 @@ If you want to try brute force of prefix (preBrute) and/or suffix (postBrute) se
 
 ## Conclusion
 This is a very simple tool. I hope it will help you to recover your ethereum wallet.
+Feel free to suggest new features or improvements.
 
 Please make a donation to developer:
 
